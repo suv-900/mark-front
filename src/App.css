@@ -18,3 +18,29 @@
         .table li {
             margin-bottom: 5px;
         }
+
+.friend {
+    display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.chat-button {
+  cursor: pointer;
+}
+.username {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.online {
+    margin-left: auto;
+    color: rgb(29, 166, 29);
+}
+
+.offline {
+  margin-left: auto;
+  color: rgb(93, 90, 90);
+}

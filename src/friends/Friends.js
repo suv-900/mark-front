@@ -11,7 +11,9 @@ export default function Friends(){
     let friendsList;
     let friendRequestDiv;
     let friendsListDiv;
-    
+    let friendRequestsCount=0;
+    let friendsCount=0;
+
     useEffect(()=>{
         friendRequestsList=new LinkedList();
         friendsList=new LinkedList();
@@ -94,10 +96,12 @@ export default function Friends(){
 
                             const friendDiv=document.createElement("div");
                             friendDiv.id=friend.userID;
-                            
+                            friendDiv.className="friend";
+
                             const username=document.createElement("a");
                             username.href=`http://localhost:8080/users/getuser/${friend.username}`;
                             username.text=friend.username;
+                            username.className="username";
                             friendDiv.appendChild(username);
 
                             const id=document.createElement("div");
@@ -111,11 +115,13 @@ export default function Friends(){
                             const chatButton=document.createElement("button");
                             chatButton.innerText="chat";
                             chatButton.type="button";
+                            chatButton.className="chat-button";
                             chatButton.onclick=`http://localhost:8080/chat?chatID=${friend.chatID}`;
                             friendDiv.appendChild(chatButton);
 
                             const online=document.createElement("div");
-                            online.innerText=friend.online;
+                            online.innerText="●";
+                            online.className=friend.online? "online":"offline"
                             friendDiv.appendChild(online);
                             
                             const fList=document.createElement("li");
@@ -125,8 +131,8 @@ export default function Friends(){
                             friendsList.add(friendDiv);
                             friendsListDiv.appendChild(fList);
                         }
-                        const headerDiv=document.getElementById("friendsListHeader");
-                        headerDiv.innerHTML="Friends "+friendsList.length; 
+                        friendsCount=friendsList.length;
+                        updateFriendsCount(); 
                     } 
                     else if(status === 500){
                         const responseText=await response.text();
@@ -166,7 +172,8 @@ export default function Friends(){
                     headerDiv.innerText="Friend Requests 0";
                     return;
                 }
-                        
+                
+                console.log(requestList);
                        
                 for(let i=0;i<requestList.length;i++){
                     //id,username,email,online
@@ -195,7 +202,8 @@ export default function Friends(){
                     friendRequestDiv.appendChild(requestDiv);
                 }
                 const headerDiv=document.getElementById("friendRequestsHeader");
-                headerDiv.innerHTML="Friend Requests "+requestList.length; 
+                friendRequestsCount=requestList.length;
+                updateRequestCount(); 
                 } 
                 else if(status === 500){
                     const responseText=await response.text();
@@ -214,7 +222,15 @@ export default function Friends(){
                 }
 
     }
+    function updateRequestCount(){
+        const header=document.getElementById("friendRequestsHeader");
+        header.innerHTML="Friend Requests "+friendRequestsCount;
+    }
+    function updateFriendsCount(){
+        const headerDiv=document.getElementById("friendsListHeader");
+        headerDiv.innerHTML="Friends "+friendsCount;
 
+    }
     async function sendFriendRequest(){
         if(!tokenValid || isEmpty(token)) return; 
             
@@ -273,7 +289,15 @@ export default function Friends(){
             const status=response.status;
             if(status === 200){
                 addFriendToList(fromUserID,index);
+                friendRequestDiv.removeChild(friendRequestsList.get(index)); 
+                friendRequestsList.removeAt(index);
+               
+                friendsCount+=1;
+                friendRequestsCount-=1;
+                updateRequestCount();
+                updateFriendsCount(); 
                 statusDiv.innerHTML=status+" "+responseText;
+
             }else if(status === 500){
                 statusDiv.innerHTML=status+" "+responseText;
             }else if(status === 401){
@@ -309,6 +333,9 @@ export default function Friends(){
             const status=response.status;
             if(status === 200){
                 friendRequestDiv.removeChild(friendRequestsList.get(index)); 
+                friendRequestsList.removeAt(index);
+                friendRequestsCount-=1;
+                updateRequestCount();
                 statusDiv.innerHTML=status+" "+responseText;
             }else if(status === 500){
                 statusDiv.innerHTML=status+" "+responseText;
@@ -326,7 +353,7 @@ export default function Friends(){
         
         async function addFriendToList(userID,index){
             const statusDiv=document.getElementById("friendRequestStatusDiv");
-            if(userID === undefined){
+            if(userID == undefined){
                 statusDiv.innerHTML="userID is undefined";
             }
 
@@ -341,14 +368,14 @@ export default function Friends(){
 
             if(status === 200){
                 const friend=await response.json();
-                setTimeout(()=>{
-
                     const friendDiv=document.createElement("div");
                     friendDiv.id=friend.userID;
-                            
+                    friendDiv.className="friend";
+
                     const username=document.createElement("a");
                     username.href=`http://localhost:8080/users/getuser/${friend.username}`;
                     username.text=friend.username;
+                    username.className="username";
                     friendDiv.appendChild(username);
 
                     const id=document.createElement("div");
@@ -359,23 +386,29 @@ export default function Friends(){
                     email.innerText=friend.emailID;
                     friendDiv.appendChild(email);
                             
+                    const chatButton=document.createElement("button");
+                    chatButton.innerText="chat";
+                    chatButton.type="button";
+                    chatButton.className="chat-button";
+                    chatButton.onclick=`http://localhost:8080/chat?chatID=${friend.chatID}`;
+                    friendDiv.appendChild(chatButton);
+
                     const online=document.createElement("div");
-                    online.innerText=friend.online;
+                    online.innerText="●";
+                    online.className=friend.online? "online":"offline"
                     friendDiv.appendChild(online);
                             
                     const fList=document.createElement("li");
                     fList.id=friend.userID;
                     fList.appendChild(friendDiv);
-                    let a=[];
-                            
-                    friendsList.add(friendDiv);
-                    friendsListDiv.appendChild(fList);
-                            
-                    friendRequestDiv.removeChild(friendRequestsList.get(index));
-                    friendRequestsList.removeAt(index);
-                    status.innerHTML=status+" OK";
 
-                }) 
+                    friendsList.add(friendDiv);
+                    friendsListDiv.appendChild(fList)
+                    
+                            
+                    statusDiv.innerHTML=status+" OK";
+                    
+
             }else if(status === 401){
                 const link=document.createElement("a");
                 link.href="localhost:8080/users/login";

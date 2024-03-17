@@ -32,12 +32,14 @@ export default class LinkedList{
             pop(){
                 if(this.head === null){
                     return;
-                }else{
-                
-                this.tail=this.tail.prev;
-                this.tail.next=null;
-                this.length--;
                 }
+                if(this.length === 1){
+                    this.head=this.tail=null;
+                }else{
+                    this.tail=this.tail.prev;
+                    this.tail.next=null;
+                }
+                this.length--;
             }
 
             get(index){
