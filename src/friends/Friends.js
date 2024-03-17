@@ -1,36 +1,44 @@
 import React from 'react';
 import '../App.css'
 import LinkedList from '../utils/LinkedList'
+import { useEffect } from 'react';
 
-//checkToken first
-//500ms later two functions
 export default function Friends(){
     let tokenValid=false;
-    const token=localStorage.getItem("Token");
     let outputDiv;
+    let token;
+    let friendRequestsList;
+    let friendsList;
+    let friendRequestDiv;
+    let friendsListDiv;
+    
+    useEffect(()=>{
+        friendRequestsList=new LinkedList();
+        friendsList=new LinkedList();
+        friendsListDiv=document.getElementById("friendsList");
+        friendRequestDiv=document.getElementById("friendRequestsList");
 
-    setTimeout(()=>{
         checkToken()
-    },100)
-
-    setTimeout(()=>{
-        if(tokenValid){
-            fetchFriendsList();
-            fetchPendingFriendRequests();
-        }
-    },800);
-
+        setTimeout(()=>{
+            if(tokenValid){
+                fetchFriendsList();
+                fetchPendingFriendRequests();
+            }
+        },800);
+    },[])    
 
     async function checkToken(){
         outputDiv=document.getElementById("outputDiv");    
+        token=localStorage.getItem("Token");
+        
         if(token === null){
-                outputDiv.innerHTML="Login required";
-                const anchorElement=document.createElement("a");
-                anchorElement.href="localhost:8080/users/login";
-                anchorElement.text="login";
-                outputDiv.appendChild(anchorElement);
-                return;
-            }
+            outputDiv.innerHTML="Login required";
+            const anchorElement=document.createElement("a");
+            anchorElement.href="localhost:/login";
+            anchorElement.text="login";
+            outputDiv.appendChild(anchorElement);
+            return;
+        }
             
             const reqHeaders={"Token":token};
             const response=await fetch("http://localhost:8080/users/verifytoken",{
@@ -57,19 +65,12 @@ export default function Friends(){
                 outputDiv.innerHTML=status+" "+responseText;
             }
         }
-        // useEffect(()=>{
-        //     checkToken()
-        // },[])  
-                
-        let friendsListDiv=document.getElementById("friendsList");
-        let friendRequestDiv=document.getElementById("friendRequestsList");
-        const friendRequestsList=new LinkedList();
-        const friendsList=new LinkedList();
-
+        
         async function fetchFriendsList(){
             if(!tokenValid || isEmpty(token)) return; 
 
 
+            
             const reqHeaders={"Token":token};
             const response=await fetch("http://localhost:8080/users/getFriends",{
                 method:"GET",
@@ -146,6 +147,7 @@ export default function Friends(){
 
         async function fetchPendingFriendRequests(){
             if(!tokenValid || isEmpty(token)) return; 
+            
             
             const reqHeaders={"Token":token};
             const response=await fetch("http://localhost:8080/users/getPendingFriendRequests",{
@@ -396,12 +398,12 @@ export default function Friends(){
     return(
         <div>
             <div className="container">
-            <div className="table"> 
+            <div id="friendsDiv" className="table"> 
                 <h2 id="friendsListHeader">Friends</h2>
                 <ul id="friendsList">
                 </ul>
             </div>
-            <div id="friendRequestsList"  className="table">
+            <div id="friendRequestsDiv"  className="table">
                 <h2 id="friendRequestsHeader">Friend Requests</h2>
                 <ul id="friendRequestsList">
                     
@@ -420,6 +422,7 @@ export default function Friends(){
         </form>
         <div id="friendListStatusDiv" ></div>
         <div id="friendRequestStatusDiv" ></div>
+        <div id="outputDiv" ></div>
 
         </div>
     )
