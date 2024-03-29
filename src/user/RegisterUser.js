@@ -1,6 +1,8 @@
 import React from 'react';
+import {render} from 'react-dom';
+import ChatPage from '../chat/ChatPage';
+
 export default function RegisterUser(){
-    
         async function registerUser(){
             const outputDiv=document.getElementById("outputDiv");
             const form=document.getElementById("registerForm");
@@ -52,7 +54,17 @@ export default function RegisterUser(){
             if(status === 200){
                 const token=response.headers.get("Token");
                 localStorage.setItem("Token",token);
-                outputDiv.innerHTML=status+" "+responseText;
+                
+                console.log("adding user to xmpp server"); 
+                
+                registerUserWebSocket(username,password);
+                
+                console.log("process finished");
+                //render chatPage
+                const app=document.getElementById("app");
+                
+                // render(<ChatPage username={username} password={password} />,app);
+
             }else if(status === 500){
                 outputDiv.innerHTML=status+" "+responseText;
                     
@@ -65,39 +77,34 @@ export default function RegisterUser(){
                 outputDiv.innerHTML="Unknown error "+status+" "+responseText;
             }
         }
-    //         const xhttp=new XMLHttpRequest();
+        function registerUserWebSocket(username,password){
+        const obj={
+            from:username,
+            messageContent:password,
+            messageType:"REGISTER"
+        }
             
-    //         xhttp.onreadystatechange=()=>{
-    //             if(xhttp.readyState===4){
-    //                 const status=xhttp.status;
-    //                 let token;
-                    
-    //                 const response=xhttp.response;
-    //                 if(status===200){
-    //                     token=xhttp.getResponseHeader("Token");
-    //                     localStorage.setItem("Token",token);
-                        
-    //                     outputDiv.innerHTML=status+" "+response;
-    //                 }else if(status === 500){
-                       
-    //                     outputDiv.innerHTML=status+" "+response;
-    //                 }else if(status === 401){
-                        
-    //                     outputDiv.innerHTML=status+" "+response;
-    //                 }else if(status === 400){
-                        
-    //                     outputDiv.innerHTML=status+" "+response;
-    //                 }else{
-    //                     outputDiv.innerHTML=status+" "+response;
-    //                 }
-    //             }
-    //     }
-    //     xhttp.open("POST","http://localhost:8080/users/register",true)
-    //     xhttp.setRequestHeader("Content-Type","application/x-www-form-urlencoded")
-    //     xhttp.send(`username=${username}&email=${email}&password=${password}`)
-    // }
+        const message=JSON.stringify(obj); 
 
-    return(
+        const ws=new WebSocket("ws://localhost:8080/chat");
+
+        ws.onopen=()=>{
+            console.log("Connection open.");
+            ws.send(message);
+        }
+
+        ws.onerror=(e)=>{
+            console.log("Error "+e);
+        }
+        ws.onmessage=(e)=>{
+            console.log(JSON.parse(e.data));
+        }
+        ws.onclose=(e)=>{
+            console.log("Connection closed.");
+        }  
+}
+    
+        return(
         <div>
              <form id="registerForm" className="form">
             <input id="username" className="input-field" placeholder="username" type="text" required/><br></br>

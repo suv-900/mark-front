@@ -91,7 +91,6 @@ export default function Friends(){
                     return;
                 }
                         for(let i=0;i<friendsListJSON.length;i++){
-                            //id,username,email,online
                             const friend=friendsListJSON[i];
 
                             const friendDiv=document.createElement("div");
@@ -107,10 +106,6 @@ export default function Friends(){
                             const id=document.createElement("div");
                             id.innerText=friend.userID;
                             friendDiv.appendChild(id);
-                            
-                            const email=document.createElement("div");
-                            email.innerText=friend.emailID;
-                            friendDiv.appendChild(email);
                             
                             const chatButton=document.createElement("button");
                             chatButton.innerText="chat";
@@ -176,7 +171,6 @@ export default function Friends(){
                 console.log(requestList);
                        
                 for(let i=0;i<requestList.length;i++){
-                    //id,username,email,online
                     const request=requestList[i];
 
                     const requestDiv=document.createElement("div");
@@ -262,7 +256,10 @@ export default function Friends(){
             link.href="localhost:8080/users/login";
             link.text="login";
             statusDiv.appendChild(link);
-        }else{
+        }else if(status === 409){
+            statusDiv.innerHTML=status+" "+responseText;
+        }
+        else{
             statusDiv.innerHTML=status+" "+responseText;
         }
     }
@@ -382,10 +379,6 @@ export default function Friends(){
                     id.innerText=friend.userID;
                     friendDiv.appendChild(id);
                             
-                    const email=document.createElement("div");
-                    email.innerText=friend.emailID;
-                    friendDiv.appendChild(email);
-                            
                     const chatButton=document.createElement("button");
                     chatButton.innerText="chat";
                     chatButton.type="button";
@@ -443,15 +436,12 @@ export default function Friends(){
                 </ul>
             </div>
         </div>
-        
-        <div>
-            <a >accept</a>
-            <a >deny</a>
-        </div>
 
+        send friend request. 
         <form id="addUserForm">
             <input id="sendFriendRequestInput" type="text" placeholder="add user" required/><br></br>
             <button type="button" onClick={()=>{sendFriendRequest()}}>send</button>
+            <div id="requestStatusDiv"></div>
         </form>
         <div id="friendListStatusDiv" ></div>
         <div id="friendRequestStatusDiv" ></div>
