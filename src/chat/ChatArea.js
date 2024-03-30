@@ -66,10 +66,22 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
         ws.send(messageJSON);
 
         const sendingMessagesDiv=document.getElementById("sendingMessages-area");
+        
+        const wrapperDiv=document.createElement("div");
+        
         const messageDiv=document.createElement("div");
         messageDiv.innerHTML=message;
-                
-        sendingMessagesDiv.appendChild(messageDiv);
+        messageDiv.className="sender";
+        
+
+        const timeDiv=document.createElement("div");
+        const d=new Date();
+        timeDiv.innerHTML=d.getTime();
+        timeDiv.className="timestamp";
+
+        wrapperDiv.appendChild(messageDiv);
+        wrapperDiv.appendChild(timeDiv);
+        sendingMessagesDiv.appendChild(wrapperDiv);
     }
     
     async function fetchMessages(){
@@ -80,13 +92,14 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             method:"GET",
             headers:reqHeaders
         })
-            
+        
         const status=response.status;
         if(status === 200){
             const responseJSON=await response.json();
             const sendingMessagesDiv=document.getElementById("sendingMessages-area");
             const receivingMessagesDiv=document.getElementById("receivingMessages-area");
             
+            console.log(responseJSON); 
             
             for(let i=0;i<responseJSON.length;i++){
                 const message=responseJSON[i];
@@ -95,11 +108,23 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
                 messageDiv.id=message.messageID;
                 messageDiv.innerHTML=message.messageContent;
                 
-                if(message.type === "sending"){
-                    sendingMessagesDiv.appendChild(messageDiv);
+                const timeDiv=document.createElement("div");
+                const time=removeDate(message.createdAt);
+
+                timeDiv.innerHTML=time;
+                timeDiv.className="timestamp";
+
+                const wrapperDiv=document.createElement("div");
+                wrapperDiv.className="message-Wrapper";
+                wrapperDiv.appendChild(messageDiv);
+                wrapperDiv.appendChild(timeDiv);
+                if(message.messageType === "sending"){
+                    sendingMessagesDiv.appendChild(wrapperDiv);
+                    messageDiv.className="sender";
                 }
-                if(message.type === "receiving"){
-                    receivingMessagesDiv.appendChild(messageDiv);
+                if(message.messageType === "receiving"){
+                    receivingMessagesDiv.appendChild(wrapperDiv);
+                    messageDiv.className="receiver";
                 }
             }
         }else{
@@ -107,14 +132,24 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             console.log("Status:"+status+" responseText:"+responseText);
         }
     }
-
+    function removeDate(s){
+        let commas=0;
+        for(let i=0;i<s.length;i++){
+            if(s[i] === ','){
+                commas++;
+            }
+            if(commas === 2){
+               return s.substring(i+1,s.length); 
+            }
+        }
+    }
     return(
         <div>
             {valid && renderComponent ? 
             <div>
-                <div id="messages" className="message">
-                    <div id="sendingMessages-area" ></div>
-                    <div id="receivingMessages-area" ></div> 
+                <div id="messages" className="message-container"> 
+                    <div id="receivingMessages-area" className="receiver-messsage-container" ></div> 
+                    <div id="sendingMessages-area"  className="sender-message-container" ></div>
                 </div>
                 
                 <div id="text-area" className="input-area">

@@ -43,14 +43,14 @@ export default function ChatPage({username,password}){
     }
      
     return(
-        <div id="chat-container" className="chat-container">
-
+        <div id="chatpage-container" className="chat-container">
+        {/* 
             <form>
                 <input type="text" placeholder="search user"/>
                 <button onClick={()=>{}}>Search</button>
-            </form>
+            </form> */}
 
-            <div id="contact-area" >
+            <div id="contact-area" className="contact-area">
                 <Suspense fallback={<Loading/>}>
                     <ContactArea username={username} password={password}/>
                 </Suspense>
