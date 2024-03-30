@@ -1,17 +1,17 @@
-import { renderLoginPage } from "./ChatPage";
 import React, { useState,useEffect } from "react"
-//turn on websocket to user
-export default function ChatArea({username,render,friendName,friendID}){
+
+export default function ChatArea({friendID,friendName,renderComponent,username,password}){
     const[valid,setValid]=useState(false);
     const[ws,setWS]=useState(null);
+    const[message,setMessage]=useState(null);
 
     useEffect(()=>{
-        if(render === false || friendName.length === 0 || friendID === null || username.length === 0){
-            setValid(false)
-        }else{
+        if(renderComponent === true && (friendID !== null && friendName !== null && username !== null && password !== null)){
             setValid(true);
-            fetchMessages(friendID);
+            fetchMessages();
             connect();
+        }else{
+           setValid(false); 
         }
     },[])
 
@@ -19,12 +19,18 @@ export default function ChatArea({username,render,friendName,friendID}){
         const ws=new WebSocket("ws://localhost:8080/chat");
         setWS(ws);
         
+        const messageObject={
+            "from":username,
+            "messageContent":password,
+            "messageType":"CONNECT"
+        }
+        
+        const messageJSON=JSON.stringify(messageObject);
+        
         ws.onopen=()=>{
             console.log("Connection open.");
             
-            const obj={"messageType":"OK"};
-            const s=JSON.stringify(obj);
-            ws.send(s);
+            ws.send(messageJSON);
         }
         ws.onerror=(e)=>{
             console.log("Error "+e);
@@ -36,30 +42,49 @@ export default function ChatArea({username,render,friendName,friendID}){
         ws.onclose=(e)=>{
             console.log("Connection closed.");
         }
-        console.log("Something happened");
     }
-
-    function disconnect(){
+    function sendMessage(){
         if(ws === null){
-            console.log("ws is null cannot disconnect.");
+            console.log("ws is null cannot sendMessage.");
+            return;
+        } 
+        
+
+        if(message === null){
+            console.log("Message length 0");
             return;
         }
-        if(ws.OPEN){
-            ws.close();
+        const messageObject={
+            from:username,
+            to:friendName,
+            messageContent:message,
+            messageType:"MESSAGE"
         }
-    }
-    async function fetchMessages(friendID){
-        const reqBody=JSON.stringify({"friendID":friendID});
+        
+        const messageJSON=JSON.stringify(messageObject);
 
-        const response=await fetch("http://localhost:8080/users/getMessages",{
+        ws.send(messageJSON);
+
+        const sendingMessagesDiv=document.getElementById("sendingMessages-area");
+        const messageDiv=document.createElement("div");
+        messageDiv.innerHTML=message;
+                
+        sendingMessagesDiv.appendChild(messageDiv);
+    }
+    
+    async function fetchMessages(){
+        const token=localStorage.getItem("Token");
+        const reqHeaders={"Token":token};
+
+        const response=await fetch(`http://localhost:8080/users/getMessages?userID=${friendID}`,{
             method:"GET",
-            body:reqBody,
+            headers:reqHeaders
         })
             
         const status=response.status;
         if(status === 200){
             const responseJSON=await response.json();
-            const sendingMessagesDiv=document.getElementById("sendMessages-area");
+            const sendingMessagesDiv=document.getElementById("sendingMessages-area");
             const receivingMessagesDiv=document.getElementById("receivingMessages-area");
             
             
@@ -67,8 +92,8 @@ export default function ChatArea({username,render,friendName,friendID}){
                 const message=responseJSON[i];
                 
                 const messageDiv=document.createElement("div");
-                messageDiv.id=i;
-                messageDiv.innerHTML=message.content;
+                messageDiv.id=message.messageID;
+                messageDiv.innerHTML=message.messageContent;
                 
                 if(message.type === "sending"){
                     sendingMessagesDiv.appendChild(messageDiv);
@@ -77,27 +102,25 @@ export default function ChatArea({username,render,friendName,friendID}){
                     receivingMessagesDiv.appendChild(messageDiv);
                 }
             }
-        }if(status === 401){
         }else{
-            //unknown error
+            const responseText=await response.text();
+            console.log("Status:"+status+" responseText:"+responseText);
         }
     }
 
     return(
         <div>
-            {valid && render ? 
+            {valid && renderComponent ? 
             <div>
-                <div id="messages">
+                <div id="messages" className="message">
                     <div id="sendingMessages-area" ></div>
                     <div id="receivingMessages-area" ></div> 
                 </div>
                 
-                <form id="text-area" >
-                    <input type="text" placeholder="send message..." />
-                    <button>send</button>
-                </form>
-                <button onClick={()=>{connect()}}>connect</button>
-                <button onClick={()=>{disconnect()}}>disconnect</button>
+                <div id="text-area" className="input-area">
+                    <input type="text" placeholder="send message..." onChange={(e)=>{setMessage(e.target.value)}}/>
+                    <button type="button" onClick={()=>{sendMessage()}}>send</button>
+                </div>
             </div>
             :<div>
                <h4>Empty :(</h4> 

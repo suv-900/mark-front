@@ -7,7 +7,6 @@ import {useEffect,useState,Suspense} from 'react';
 import {render} from 'react-dom';
 
 export default function ChatPage({username,password}){
-    const[token,setToken]=useState(null);
     const[tokenValid,setTokenValid]=useState(false);
 
     useEffect(()=>{
@@ -15,13 +14,13 @@ export default function ChatPage({username,password}){
         if(storedToken === null){
             renderLoginPage()
         }else{
-            setToken(storedToken);
-            verifyToken(token); 
+            verifyToken(); 
         } 
         
     },[])
     
-    async function verifyToken(token){
+    async function verifyToken(){
+        const token=localStorage.getItem("Token");
         const reqHeaders={"Token":token};
         const response=await fetch("http://localhost:8080/users/verifytoken",{
             method:"POST",
@@ -50,15 +49,19 @@ export default function ChatPage({username,password}){
                 <input type="text" placeholder="search user"/>
                 <button onClick={()=>{}}>Search</button>
             </form>
-            
-            <Suspense fallback={<Loading/>}>
-                <ContactArea username={username}/>
-            </Suspense>
-            
-            <Suspense fallback={<Loading/>}>
-                <ChatArea username={username} render={false}/>
-            </Suspense>
 
+            <div id="contact-area" >
+                <Suspense fallback={<Loading/>}>
+                    <ContactArea username={username} password={password}/>
+                </Suspense>
+            </div>
+            
+            <div id="chat-area" className="chat-area" >
+                <Suspense fallback={<Loading/>}>
+                    <ChatArea render={false}/>
+                </Suspense>
+            </div> 
+            
         </div>
     )
 }

@@ -1,5 +1,7 @@
-import React from 'react';
-
+import React, { Suspense } from 'react';
+import { render } from 'react-dom';
+import ChatPage from '../chat/ChatPage';
+import Loading from '../chat/Loading';
 export default function LoginPage(){
         
     async function submitLoginForm(){
@@ -14,35 +16,62 @@ export default function LoginPage(){
                 return;
             }
         
-            
-            const reqBody=JSON.stringify({username,password});
+            // loginUserWebSocket(username,password); 
+            const reqbody=JSON.stringify({username,password});
             const response= await fetch("http://localhost:8080/users/login",{
-                method:"POST",
-                body:reqBody
+                method:"post",
+                body:reqbody
             })
             
-            const responseText=await response.text();
+            const responsetext=await response.text();
             const status=response.status;
               
             if(status === 200){
                 const token=response.headers.get("Token");
                 localStorage.setItem("Token",token);
-                outputDiv.innerHTML=status+" "+responseText;
+                render(
+                <Suspense fallback={<Loading/>}>
+                    <ChatPage username={username} password={password}/>
+                </Suspense>,document.getElementById("app"));
             }else if(status === 500){
-                outputDiv.innerHTML=status+" "+responseText;
+                outputDiv.innerhtml=status+" "+responsetext;
                    
             }else if(status === 401){
-                outputDiv.innerHTML=status+" "+responseText;
+                outputDiv.innerhtml=status+" "+responsetext;
             }else if(status === 400){
-                outputDiv.innerHTML=status+" "+responseText;
+                outputDiv.innerhtml=status+" "+responsetext;
                    
             }else{
-                outputDiv.innerHTML="Unknown error "+status+" "+responseText;
+                outputDiv.innerhtml="unknown error "+status+" "+responsetext;
             }
-
            
     }
- 
+    function loginUserWebSocket(username,password){
+        const obj={
+            from:username,
+            messageContent:password,
+            messageType:"CONNECT"
+        }
+            
+        const message=JSON.stringify(obj); 
+
+        const ws=new WebSocket("ws://localhost:8080/chat");
+
+        ws.onopen=()=>{
+            console.log("Connection open.");
+            ws.send(message);
+        }
+
+        ws.onerror=(e)=>{
+            console.log("Error "+e);
+        }
+        ws.onmessage=(e)=>{
+            console.log(JSON.parse(e.data));
+        }
+        ws.onclose=(e)=>{
+            console.log("Connection closed.");
+        }  
+    }
     return(
         <div>
             <form id="loginForm">

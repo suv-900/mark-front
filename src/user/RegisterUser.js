@@ -102,7 +102,7 @@ export default function RegisterUser(){
         ws.onclose=(e)=>{
             console.log("Connection closed.");
         }  
-}
+        }
     
         return(
         <div>
