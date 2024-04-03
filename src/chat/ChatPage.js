@@ -6,9 +6,8 @@ import Loading from "./Loading";
 import {useEffect,useState,Suspense} from 'react';
 import {render} from 'react-dom';
 
-export default function ChatPage({username,password}){
-    const[tokenValid,setTokenValid]=useState(false);
-
+function ChatPage({username,password}){
+    
     useEffect(()=>{
         const storedToken=localStorage.getItem("Token");
         if(storedToken === null){
@@ -16,7 +15,6 @@ export default function ChatPage({username,password}){
         }else{
             verifyToken(); 
         } 
-        
     },[])
     
     async function verifyToken(){
@@ -30,7 +28,6 @@ export default function ChatPage({username,password}){
         const responseText=await response.text();
         const status=response.status;
         if(status === 200){
-            setTokenValid(true);    
             return;
         }else{
             console.log("response status:"+status+" "+responseText);
@@ -38,10 +35,7 @@ export default function ChatPage({username,password}){
         } 
         
     } 
-    function renderLoginPage(){
-        render(<LoginPage />,document.getElementById("app"));
-    }
-     
+    
     return(
         <div id="chatpage-container" className="chat-container">
         {/* 
@@ -52,7 +46,7 @@ export default function ChatPage({username,password}){
 
             <div id="contact-area" className="contact-area">
                 <Suspense fallback={<Loading/>}>
-                    <ContactArea username={username} password={password}/>
+                    <ContactArea username={username} password={password} />
                 </Suspense>
             </div>
             
@@ -65,3 +59,9 @@ export default function ChatPage({username,password}){
         </div>
     )
 }
+    function renderLoginPage(){
+        render(<LoginPage />,document.getElementById("app"));
+    }
+
+export {ChatPage,renderLoginPage}
+ 

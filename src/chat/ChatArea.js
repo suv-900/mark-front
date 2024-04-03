@@ -3,7 +3,6 @@ import React, { useState,useEffect } from "react"
 export default function ChatArea({friendID,friendName,renderComponent,username,password}){
     const[valid,setValid]=useState(false);
     const[ws,setWS]=useState(null);
-    const[message,setMessage]=useState(null);
 
     useEffect(()=>{
         if(renderComponent === true && (friendID !== null && friendName !== null && username !== null && password !== null)){
@@ -36,8 +35,27 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             console.log("Error "+e);
         }
         ws.onmessage=(e)=>{
-            console.log("E "+e);
-            console.log("data: "+e.data);
+            
+            const message=JSON.parse(e.data);
+            console.log(message);
+            
+            const receivingMessagesDiv=document.getElementById("receivingMessages-area");
+            const wrapperDiv=document.createElement("div");
+        
+            const messageDiv=document.createElement("div");
+            messageDiv.innerHTML=message.messageContent;
+            messageDiv.className="receiver";
+            
+            const timeStamp=getTime();
+            const timeDiv=document.createElement("div");
+            timeDiv.innerHTML=timeStamp;
+            timeDiv.className="timestamp";
+
+
+            wrapperDiv.appendChild(messageDiv);
+            wrapperDiv.appendChild(timeDiv);
+
+            receivingMessagesDiv.appendChild(wrapperDiv);
         }
         ws.onclose=(e)=>{
             console.log("Connection closed.");
@@ -49,22 +67,23 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             return;
         } 
         
+        const form=document.getElementById("text-area");
+        const message=form.elements[0].value;
 
         if(message === null){
-            console.log("Message length 0");
             return;
         }
         const messageObject={
             from:username,
             to:friendName,
             messageContent:message,
-            messageType:"MESSAGE"
+            messageType:"MESSAGE",
         }
         
         const messageJSON=JSON.stringify(messageObject);
 
         ws.send(messageJSON);
-
+        
         const sendingMessagesDiv=document.getElementById("sendingMessages-area");
         
         const wrapperDiv=document.createElement("div");
@@ -73,17 +92,29 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
         messageDiv.innerHTML=message;
         messageDiv.className="sender";
         
-
+        const timeStamp=getTime();
+        console.log(timeStamp);
         const timeDiv=document.createElement("div");
-        const d=new Date();
-        timeDiv.innerHTML=d.getTime();
+        timeDiv.innerHTML=timeStamp;
         timeDiv.className="timestamp";
 
         wrapperDiv.appendChild(messageDiv);
         wrapperDiv.appendChild(timeDiv);
         sendingMessagesDiv.appendChild(wrapperDiv);
     }
-    
+    function getTime(){
+        const now = new Date();
+        let hours = now.getHours();
+        const amPM = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12; 
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timeStamp=`${hours}:${minutes}:${seconds} ${amPM}`;
+        
+        return timeStamp;
+
+    }
+
     async function fetchMessages(){
         const token=localStorage.getItem("Token");
         const reqHeaders={"Token":token};
@@ -152,10 +183,10 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
                     <div id="sendingMessages-area"  className="sender-message-container" ></div>
                 </div>
                 
-                <div id="text-area" className="input-area">
-                    <input type="text" placeholder="send message..." onChange={(e)=>{setMessage(e.target.value)}}/>
-                    <button type="button" onClick={()=>{sendMessage()}}>send</button>
-                </div>
+                <form id="text-area" className="input-area">
+                    <input type="text" placeholder="send message..."/> 
+                    <button type="button" onClick={(e)=>{sendMessage(e.timeStamp)}} >send</button>
+                </form>
             </div>
             :<div>
                <h4>Empty :(</h4> 

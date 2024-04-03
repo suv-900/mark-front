@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { render } from 'react-dom';
-import ChatPage from '../chat/ChatPage';
+import {ChatPage} from '../chat/ChatPage';
 import Loading from '../chat/Loading';
 export default function LoginPage(){
         
@@ -46,32 +46,7 @@ export default function LoginPage(){
             }
            
     }
-    function loginUserWebSocket(username,password){
-        const obj={
-            from:username,
-            messageContent:password,
-            messageType:"CONNECT"
-        }
-            
-        const message=JSON.stringify(obj); 
-
-        const ws=new WebSocket("ws://localhost:8080/chat");
-
-        ws.onopen=()=>{
-            console.log("Connection open.");
-            ws.send(message);
-        }
-
-        ws.onerror=(e)=>{
-            console.log("Error "+e);
-        }
-        ws.onmessage=(e)=>{
-            console.log(JSON.parse(e.data));
-        }
-        ws.onclose=(e)=>{
-            console.log("Connection closed.");
-        }  
-    }
+    
     return(
         <div>
             <form id="loginForm">

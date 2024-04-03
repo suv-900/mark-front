@@ -2,7 +2,7 @@ import LoginUser from './user/LoginPage';
 import RegisterUser from './user/RegisterUser';
 import Friends from './friends/Friends';
 import {BrowserRouter,Routes,Route} from 'react-router-dom';
-import ChatPage from './chat/ChatPage';
+import {ChatPage} from './chat/ChatPage';
 
 function App() {
   return (

@@ -2,10 +2,14 @@ import React from "react";
 import { render } from "react-dom";
 import {useEffect} from 'react';
 import ChatArea from "./ChatArea";
+import {createRoot} from 'react-dom/client'
 //pub sub
 export default function ContactArea({username,password}){
-
+    let chatRoot;
     useEffect(()=>{
+        const dom=document.getElementById("chat-area");
+        chatRoot=createRoot(dom);
+
         getContacts();
     },[])
 
@@ -30,29 +34,18 @@ export default function ContactArea({username,password}){
             const friendDiv=document.createElement("div");
             friendDiv.id=friend.userID;
             friendDiv.className="contact-item";
-
+            friendDiv.onclick=()=>{
+                console.log("clicked");
+                chatRoot.render(<ChatArea friendID={friend.userID} friendName={friend.username} 
+                        renderComponent={true} 
+                        username={username} 
+                        password={password}/>)}
+            
             const friendUsername=document.createElement("a");
-            // username.href=`http://localhost:8080/users/getuser/${friend.username}`;
             friendUsername.text=friend.username;
             friendUsername.className="username";
             friendDiv.appendChild(friendUsername);
-
-            // const id=document.createElement("div");
-            // id.innerText=friend.userID;
-            // friendDiv.appendChild(id);
-                            
-            const chatButton=document.createElement("button");
-            chatButton.innerText="chat";
-            chatButton.type="button";
-            chatButton.className="chat-button";
-            chatButton.onclick=()=>{
-                render(<ChatArea friendID={friend.userID} friendName={friend.username} 
-                        renderComponent={true} 
-                        username={username} 
-                        password={password}/>, document.getElementById("chat-area") )}
             
-            friendDiv.appendChild(chatButton);
-
             const online=document.createElement("div");
             online.innerText="●";
             online.className=friend.online? "online":"offline"
