@@ -39,7 +39,7 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             const message=JSON.parse(e.data);
             console.log(message);
             
-            const receivingMessagesDiv=document.getElementById("receivingMessages-area");
+            const messagesDiv=document.getElementById("messages");
             const wrapperDiv=document.createElement("div");
         
             const messageDiv=document.createElement("div");
@@ -54,8 +54,9 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
 
             wrapperDiv.appendChild(messageDiv);
             wrapperDiv.appendChild(timeDiv);
+            wrapperDiv.className="message-wrapper";
 
-            receivingMessagesDiv.appendChild(wrapperDiv);
+            messagesDiv.appendChild(wrapperDiv);
         }
         ws.onclose=(e)=>{
             console.log("Connection closed.");
@@ -84,7 +85,7 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
 
         ws.send(messageJSON);
         
-        const sendingMessagesDiv=document.getElementById("sendingMessages-area");
+        const messagesDiv=document.getElementById("messages");
         
         const wrapperDiv=document.createElement("div");
         
@@ -100,7 +101,9 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
 
         wrapperDiv.appendChild(messageDiv);
         wrapperDiv.appendChild(timeDiv);
-        sendingMessagesDiv.appendChild(wrapperDiv);
+        wrapperDiv.className="message-wrapper";
+
+        messagesDiv.appendChild(wrapperDiv);
     }
     function getTime(){
         const now = new Date();
@@ -127,13 +130,16 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
         const status=response.status;
         if(status === 200){
             const responseJSON=await response.json();
-            const sendingMessagesDiv=document.getElementById("sendingMessages-area");
-            const receivingMessagesDiv=document.getElementById("receivingMessages-area");
+
+            const messagesDiv=document.getElementById("messages");
             
             console.log(responseJSON); 
             
             for(let i=0;i<responseJSON.length;i++){
                 const message=responseJSON[i];
+                
+                const wrapperDiv=document.createElement("div");
+                wrapperDiv.className="message-wrapper";
                 
                 const messageDiv=document.createElement("div");
                 messageDiv.id=message.messageID;
@@ -141,21 +147,19 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
                 
                 const timeDiv=document.createElement("div");
                 const time=removeDate(message.createdAt);
-
                 timeDiv.innerHTML=time;
                 timeDiv.className="timestamp";
 
-                const wrapperDiv=document.createElement("div");
-                wrapperDiv.className="message-Wrapper";
                 wrapperDiv.appendChild(messageDiv);
                 wrapperDiv.appendChild(timeDiv);
+                
                 if(message.messageType === "sending"){
-                    sendingMessagesDiv.appendChild(wrapperDiv);
                     messageDiv.className="sender";
+                    messagesDiv.appendChild(wrapperDiv);
                 }
                 if(message.messageType === "receiving"){
-                    receivingMessagesDiv.appendChild(wrapperDiv);
                     messageDiv.className="receiver";
+                    messagesDiv.appendChild(wrapperDiv);
                 }
             }
         }else{
@@ -179,14 +183,14 @@ export default function ChatArea({friendID,friendName,renderComponent,username,p
             {valid && renderComponent ? 
             <div>
                 <div id="messages" className="message-container"> 
-                    <div id="receivingMessages-area" className="receiver-messsage-container" ></div> 
-                    <div id="sendingMessages-area"  className="sender-message-container" ></div>
                 </div>
-                
-                <form id="text-area" className="input-area">
-                    <input type="text" placeholder="send message..."/> 
-                    <button type="button" onClick={(e)=>{sendMessage(e.timeStamp)}} >send</button>
+
+                <div className="input-area">
+                <form id="text-area"> 
+                    <input type="text" className="input-area-text" placeholder="send message..."/> 
+                    <button type="button" className="input-area-button" onClick={(e)=>{sendMessage(e.timeStamp)}} >send</button>
                 </form>
+                </div>
             </div>
             :<div>
                <h4>Empty :(</h4> 

@@ -5,6 +5,7 @@ import ChatArea from "./ChatArea";
 import {createRoot} from 'react-dom/client'
 //pub sub
 export default function ContactArea({username,password}){
+
     let chatRoot;
     useEffect(()=>{
         const dom=document.getElementById("chat-area");
