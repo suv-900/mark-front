@@ -82,17 +82,20 @@ body {
 .chat-area {
   flex: 1;
   padding: 20px;
-  overflow-y: auto;
+  min-height: 100vh;
 }
+
 .message-container {
-  display: flex;
+  display: block;
   justify-content: flex-start;
+  overflow: auto;
   margin-bottom: 10px;
+  max-height: 490px;
 } 
 
 
 .message-wrapper{
-  display:inline;
+  display: block;
 }
 
 .sender{
@@ -101,10 +104,8 @@ body {
   padding: 8px 10px;
   line-height: 26px;
   font-size: 14px;
-  text-align: right;
   border-radius: 7px;
-  display: inline-block;
-  width: auto;
+  width:auto;
 }
 
 .receiver {
@@ -114,8 +115,7 @@ body {
   line-height: 26px;
   font-size: 14px;
   border-radius: 7px;
-  display: inline-block;
-  width: auto;
+  width:auto;
 }
 
 
@@ -128,20 +128,21 @@ body {
 }
 
 .input-area {
-  display: flex;
-  align-items: center;
+  position: relative;
+  bottom: 0px;
+  width: 100%;
   padding: 10px 15px;
   background-color: #f9f9f9;
 }
 
-.input-area input[type="text"] {
-  flex: 1;
+.input-area-text {
+  width:79%; 
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
 
-.input-area button {
+.input-area-button {
   padding: 10px 20px;
   margin-left: 10px;
   background-color: #007bff;

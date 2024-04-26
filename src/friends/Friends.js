@@ -98,27 +98,10 @@ export default function Friends(){
                             friendDiv.className="friend";
 
                             const username=document.createElement("a");
-                            username.href=`http://localhost:8080/users/getuser/${friend.username}`;
                             username.text=friend.username;
                             username.className="username";
                             friendDiv.appendChild(username);
 
-                            const id=document.createElement("div");
-                            id.innerText=friend.userID;
-                            friendDiv.appendChild(id);
-                            
-                            const chatButton=document.createElement("button");
-                            chatButton.innerText="chat";
-                            chatButton.type="button";
-                            chatButton.className="chat-button";
-                            chatButton.onclick=`http://localhost:8080/chat?chatID=${friend.chatID}`;
-                            friendDiv.appendChild(chatButton);
-
-                            const online=document.createElement("div");
-                            online.innerText="●";
-                            online.className=friend.online? "online":"offline"
-                            friendDiv.appendChild(online);
-                            
                             const fList=document.createElement("li");
                             fList.id=friend.userID;
                             fList.appendChild(friendDiv);
